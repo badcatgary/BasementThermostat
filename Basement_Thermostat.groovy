@@ -149,11 +149,24 @@ def contactHandler(evt)
 
 def presenceHandler(evt)
 {
-  //if("present" == evt.value) {
-  //  myswitch.on()
-  //} else {
-  //  myswitch.off()
-  //}
+  if("present" == evt.value) {
+  	def lastTemp = sensor.currentTemperature
+	if (lastTemp != null) {
+		evaluate(lastTemp, guestSetpoint)
+	}
+  } else {
+  	def isActive = hasBeenRecentMotion()
+	log.debug "INACTIVE($isActive)"
+	if (isActive || emergencySetpoint) {
+		def lastTemp = sensor.currentTemperature
+		if (lastTemp != null) {
+			evaluate(lastTemp, isActive ? setpoint : emergencySetpoint)
+		}
+	}
+	else {
+		outlets.off()
+	}
+  }
 }
 	
 private evaluate(currentTemp, desiredTemp)
