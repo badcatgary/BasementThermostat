@@ -90,10 +90,10 @@ def updated()
 def temperatureHandler(evt)
 {
 	def isActive = hasBeenRecentMotion()
-  def guestOver = guestPresent()
+  	def guestOver = guestPresent()
 	if (guestOver) {
-    evaluate(evt.doubleValue, guestSetpoint)
-  else if (isActive || emergencySetpoint) {
+    		evaluate(evt.doubleValue, guestSetpoint)
+  	else if (isActive || emergencySetpoint) {
 		evaluate(evt.doubleValue, isActive ? setpoint : emergencySetpoint)
 	}
 	else {
@@ -103,49 +103,59 @@ def temperatureHandler(evt)
 
 def motionHandler(evt)
 {
-	if (evt.value == "active") {
-		def lastTemp = sensor.currentTemperature
-		if (lastTemp != null) {
-			evaluate(lastTemp, setpoint)
-		}
-	} else if (evt.value == "inactive") {
-		def isActive = hasBeenRecentMotion()
-		log.debug "INACTIVE($isActive)"
-		if (isActive || emergencySetpoint) {
+	def guestOver = guestPresent()
+	if (guestOver == false) {
+		if (evt.value == "active") {
 			def lastTemp = sensor.currentTemperature
 			if (lastTemp != null) {
-				evaluate(lastTemp, isActive ? setpoint : emergencySetpoint)
+				evaluate(lastTemp, setpoint)
 			}
-		}
-		else {
-			outlets.off()
+		} else if (evt.value == "inactive") {
+			def isActive = hasBeenRecentMotion()
+			log.debug "INACTIVE($isActive)"
+			if (isActive || emergencySetpoint) {
+				def lastTemp = sensor.currentTemperature
+				if (lastTemp != null) {
+					evaluate(lastTemp, isActive ? setpoint : emergencySetpoint)
+				}
+			}
+			else {
+				outlets.off()
+			}
 		}
 	}
 }
-
+	
 def contactHandler(evt)
 {
-  if ("open" == evt.value) {
-    // contact was opened, turn on a light maybe?
-    log.debug "Contact is in ${evt.value} state"
-    def lastTemp = sensor.currentTemperature
-		if (lastTemp != null) {
-			evaluate(lastTemp, setpoint)
+  def guestOver = guestPresent()
+  if (guestOver == false) {
+  	if ("open" == evt.value) {
+    		// contact was opened, turn on a light maybe?
+    		log.debug "Contact is in ${evt.value} state"
+		def isActive = hasBeenRecentMotion()
+		if (isActive) {
+	    		def lastTemp = sensor.currentTemperature
+			if (lastTemp != null) {
+				evaluate(lastTemp, setpoint)
+			}
 		}
-  } else if ("closed" == evt.value) {
-    // contact was closed, turn off the light?
-    log.debug "Contact is in ${evt.value} state"
+	} else if ("closed" == evt.value) {
+    		// contact was closed, turn off the light?
+    		log.debug "Contact is in ${evt.value} state"
+  	}
   }
 } 
 
 def presenceHandler(evt)
 {
-  if("present" == evt.value) {
-    myswitch.on()
-  } else {
-    myswitch.off()
-  }
+  //if("present" == evt.value) {
+  //  myswitch.on()
+  //} else {
+  //  myswitch.off()
+  //}
 }
+	
 private evaluate(currentTemp, desiredTemp)
 {
 	log.debug "EVALUATE($currentTemp, $desiredTemp)"
@@ -172,7 +182,7 @@ private evaluate(currentTemp, desiredTemp)
 
 private guestPresent()
 {
-  def guestsOver = false
+  def guestOver = false
   def presenceState = presence.currentState("presence")
   
   if (presenceState.value == "present") {
