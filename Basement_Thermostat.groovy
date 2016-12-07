@@ -67,7 +67,7 @@ def installed()
 		subscribe(contact, "contact", contactHandler)
 	}
 	if (presence) {
-		subscribe(presence, "prsence", presenceHandler)
+		subscribe(presence, "presence", presenceHandler)
 	}
   
 }
@@ -93,10 +93,9 @@ def temperatureHandler(evt)
   	def guestOver = guestPresent()
 	if (guestOver) {
     		evaluate(evt.doubleValue, guestSetpoint)
-  	else if (isActive || emergencySetpoint) {
+	} else if (isActive || emergencySetpoint) {
 		evaluate(evt.doubleValue, isActive ? setpoint : emergencySetpoint)
-	}
-	else {
+	} else {
 		outlets.off()
 	}
 }
@@ -149,7 +148,7 @@ def contactHandler(evt)
 
 def presenceHandler(evt)
 {
-  if("present" == evt.value) {
+  if ("present" == evt.value) {
   	def lastTemp = sensor.currentTemperature
 	if (lastTemp != null) {
 		evaluate(lastTemp, guestSetpoint)
